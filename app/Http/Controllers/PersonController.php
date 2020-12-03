@@ -14,9 +14,6 @@ class PersonController extends Controller
      */
     public function index(): JsonResponse
     {
-
-        $person = Person::find(1);
-        dd($person->age);
         $people = Person::with([
             'academyGroup' => function ($query) {
                 $query->where('archive', 1);
