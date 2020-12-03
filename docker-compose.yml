@@ -1,0 +1,60 @@
+version: "3.7"
+services:
+  app:
+    build:
+      args:
+        user: aziz
+        uid: 1000
+      context: ./
+      dockerfile: Dockerfile
+    image: tandem_app
+    container_name: tandem_app
+    restart: unless-stopped
+    working_dir: /var/www/
+    volumes:
+      - ./:/var/www
+    networks:
+      - tandem
+
+
+  db:
+    image: mysql:5.7
+    container_name: tandem_db
+    restart: unless-stopped
+    environment:
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mysql
+    volumes:
+      - ./docker-compose/mysql:/docker-entrypoint-initdb.d
+    networks:
+      - tandem
+
+  adminer:
+    image: adminer
+    container_name: tandem_adminer
+    restart: unless-stopped
+    ports:
+      - 8585:8080
+    networks:
+      - tandem
+
+  nginx:
+    image: nginx:1.17-alpine
+    container_name: tandem_nginx
+    restart: unless-stopped
+    ports:
+      - 8282:80
+    volumes:
+      - ./:/var/www
+      - ./docker-compose/nginx:/etc/nginx/conf.d
+    networks:
+      - tandem
+
+
+networks:
+  tandem:
+    driver: bridge
